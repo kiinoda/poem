@@ -1,57 +1,68 @@
 # poem
 
-A minimalist blog engine written in Go that serves Markdown posts from S3. Runs locally as an HTTP server or deploys as an AWS Lambda function.
+A minimalist blog engine written in Go that serves Markdown posts from S3. Designed for deployment as an AWS Lambda function using the Serverless Framework, which provisions the S3 bucket, custom domain, and DNS records. Also runs locally for development.
 
 ## Features
 
 - Markdown posts with TOML frontmatter
 - S3-backed content storage
 - In-memory caching with metadata-based invalidation
-- Dual-mode: local development server and AWS Lambda
+- Custom domain support with automatic DNS configuration
 - Gravatar support for author avatars
 - GitHub Flavored Markdown rendering
 
-## Installation
+## Deployment (Recommended)
+
+The recommended way to run poem is via AWS Lambda using the Serverless Framework. This provisions:
+
+- Lambda function with Function URL
+- S3 bucket for content storage
+- Custom domain with Route 53 DNS records
+- ACM certificate integration
+
+### Prerequisites
+
+- [Serverless Framework](https://www.serverless.com/framework/docs/getting-started)
+- AWS credentials configured
+- (Optional) Route 53 hosted zone and ACM certificate for custom domain
+
+### Deploy
 
 ```bash
-go install github.com/kiinoda/poem@latest
+# Build for Lambda
+GOOS=linux GOARCH=arm64 go build -o bootstrap .
+
+# Deploy
+export S3_BUCKET=my-blog-bucket
+export CUSTOM_DOMAIN=blog.example.com        # optional
+export HOSTED_ZONE_NAME=example.com          # optional
+export CERTIFICATE_ARN=arn:aws:acm:...       # optional
+serverless deploy
 ```
 
-Or build from source:
-
-```bash
-git clone https://github.com/kiinoda/poem.git
-cd poem
-go build -o poem .
-```
-
-## Configuration
-
-### Environment Variables
+### Environment Variables (Deployment)
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `S3_BUCKET` | Yes | - | S3 bucket name containing blog posts |
+| `S3_BUCKET` | Yes | - | S3 bucket name for blog content |
 | `BLOG_AUTHOR_EMAIL` | No | - | Author email for Gravatar avatar |
-| `PORT` | No | `8080` | HTTP server port (local mode only) |
+| `AWS_REGION` | No | `eu-west-1` | AWS region for deployment |
+| `STAGE` | No | `prod` | Deployment stage |
+| `CUSTOM_DOMAIN` | No | - | Custom domain for the blog |
+| `HOSTED_ZONE_NAME` | No | - | Route 53 hosted zone name |
+| `CERTIFICATE_ARN` | No | - | ACM certificate ARN for HTTPS |
 
-AWS credentials are loaded via the standard AWS SDK credential chain (environment variables, shared credentials file, IAM role, etc.).
+## Local Development
 
-## Usage
-
-### Local Development
+For local testing, run the binary directly. Requires AWS credentials with S3 access.
 
 ```bash
 export S3_BUCKET=my-blog-bucket
 export BLOG_AUTHOR_EMAIL=author@example.com
-./poem
+go run .
 ```
 
-The server starts at `http://localhost:8080`.
-
-### AWS Lambda
-
-Deploy the binary as a Lambda function. The application automatically detects Lambda execution via `AWS_LAMBDA_FUNCTION_NAME` and switches to Lambda mode. Configure a Lambda Function URL for HTTP access.
+The server starts at `http://localhost:8080`. Override with the `PORT` environment variable.
 
 ## Content Structure
 
