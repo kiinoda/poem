@@ -104,6 +104,29 @@ func (h *Handler) Asset(w http.ResponseWriter, r *http.Request) {
 	w.Write(content)
 }
 
+func (h *Handler) Routes() http.Handler {
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /{$}", h.BlogList)
+	mux.HandleFunc("GET /assets/{path...}", h.Asset)
+	mux.HandleFunc("GET /{slug}", h.BlogPost)
+	return corsMiddleware(mux)
+}
+
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 func (h *Handler) BlogPost(w http.ResponseWriter, r *http.Request) {
 	if h.blogService == nil {
 		http.Error(w, "Blog service not configured", http.StatusServiceUnavailable)
