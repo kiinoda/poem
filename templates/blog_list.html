@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Author}}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cream: '#FFFAF5',
+                        warmgray: '#e8e4df',
+                        teal: '#1a8a9e',
+                        tealhover: '#157a8c',
+                        darkbg: '#1a1a1a',
+                        darkcard: '#252525',
+                        darkborder: '#333',
+                    }
+                }
+            }
+        }
+    </script>
+    <script>
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+</head>
+<body class="bg-cream dark:bg-darkbg min-h-screen text-gray-900 dark:text-gray-100 transition-colors duration-200">
+    <button onclick="toggleDarkMode()" class="fixed top-4 right-4 p-2 rounded-full bg-warmgray dark:bg-darkcard hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors z-50" aria-label="Toggle dark mode">
+        <svg class="w-5 h-5 hidden dark:block text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/>
+        </svg>
+        <svg class="w-5 h-5 block dark:hidden text-gray-700" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+        </svg>
+    </button>
+
+    <div class="max-w-2xl mx-auto px-6 py-12">
+        <header class="text-center mb-12">
+            {{if .GravatarURL}}
+            <a href="/">
+                <img src="{{.GravatarURL}}" alt="{{.Author}}" class="w-10 h-10 rounded-full mx-auto mb-3">
+            </a>
+            {{end}}
+            <h1 class="text-base font-medium">
+                <a href="/" class="text-gray-900 dark:text-gray-100 hover:text-teal transition-colors">{{.Author}}</a>
+            </h1>
+        </header>
+
+        <main class="space-y-10">
+            {{range .Posts}}
+            <article class="border-b border-warmgray dark:border-darkborder pb-10 last:border-b-0">
+                <div class="text-center text-gray-500 dark:text-gray-400 text-sm mb-2">{{.Date.Format "January 2, 2006"}}</div>
+                <h2 class="text-center text-2xl font-semibold mb-3">
+                    <a href="/{{.Slug}}" class="text-gray-900 dark:text-gray-100 hover:text-teal transition-colors">{{.Title}}</a>
+                </h2>
+                <p class="text-gray-600 dark:text-gray-400 text-justify mb-4 leading-relaxed">{{.Excerpt}}</p>
+                <div class="text-center">
+                    <a href="/{{.Slug}}" class="inline-block bg-teal hover:bg-tealhover text-white px-6 py-2 rounded-full text-sm font-medium transition-colors">
+                        Read more
+                    </a>
+                </div>
+            </article>
+            {{else}}
+            <p class="text-center text-gray-500 dark:text-gray-400">No posts yet.</p>
+            {{end}}
+        </main>
+
+        <footer class="mt-12 pt-6 border-t border-warmgray dark:border-darkborder text-center text-gray-400 dark:text-gray-500 text-xs">
+            <p>Powered by <a href="https://github.com/kiinoda/poem" class="hover:text-teal transition-colors">Poem</a></p>
+        </footer>
+    </div>
+
+    <script>
+        function toggleDarkMode() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
+            }
+        }
+    </script>
+</body>
+</html>

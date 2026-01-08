@@ -1,0 +1,54 @@
+service: poem
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: provided.al2023
+  architecture: arm64
+  region: ${env:AWS_REGION, 'eu-west-1'}
+  stage: ${env:STAGE, 'prod'}
+  memorySize: 128
+  timeout: 30
+  environment:
+    S3_BUCKET: ${env:S3_BUCKET}
+    BLOG_AUTHOR_EMAIL: ${env:BLOG_AUTHOR_EMAIL, ''}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - s3:GetObject
+            - s3:HeadObject
+            - s3:ListBucket
+          Resource:
+            - arn:aws:s3:::${env:S3_BUCKET}
+            - arn:aws:s3:::${env:S3_BUCKET}/*
+
+plugins:
+  - serverless-aws-function-url-custom-domain
+
+custom:
+  urlDomain:
+    domains:
+      - ${env:CUSTOM_DOMAIN, ''}
+    hostedZoneName: ${env:HOSTED_ZONE_NAME, ''}
+    certificateArn: ${env:CERTIFICATE_ARN, ''}
+    route53: true
+
+functions:
+  blog:
+    handler: bootstrap
+    url: true
+
+package:
+  patterns:
+    - '!./**'
+    - './bootstrap'
+
+resources:
+  Resources:
+    PoemBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${env:S3_BUCKET}
