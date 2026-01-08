@@ -6,38 +6,47 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/kiinoda/poem/internal/config"
+	"github.com/kiinoda/poem/internal/domain"
 	"github.com/kiinoda/poem/internal/services"
 )
 
+//go:embed templates/*
+var templatesFS embed.FS
+
 var blogTemplates *template.Template
 
-func InitBlogTemplates(fs embed.FS) error {
+func init() {
 	var err error
-	blogTemplates, err = template.ParseFS(fs, "templates/*.html")
-	return err
+	blogTemplates, err = template.ParseFS(templatesFS, "templates/*.html")
+	if err != nil {
+		panic("failed to parse templates: " + err.Error())
+	}
 }
 
 type BlogListData struct {
 	Title       string
 	Author      string
 	GravatarURL string
-	Posts       interface{}
+	Posts       []*domain.Post
 }
 
 type BlogPostData struct {
 	Title       string
 	Author      string
 	GravatarURL string
-	Post        interface{}
+	Post        *domain.Post
 }
 
 type Handler struct {
 	blogService *services.BlogService
+	config      *config.Config
 }
 
-func New(blogService *services.BlogService) *Handler {
+func New(blogService *services.BlogService, cfg *config.Config) *Handler {
 	return &Handler{
 		blogService: blogService,
+		config:      cfg,
 	}
 }
 
@@ -62,7 +71,7 @@ func (h *Handler) BlogList(w http.ResponseWriter, r *http.Request) {
 	data := BlogListData{
 		Title:       "",
 		Author:      author,
-		GravatarURL: h.blogService.GravatarURL(),
+		GravatarURL: h.config.GravatarURL(),
 		Posts:       posts,
 	}
 
@@ -122,7 +131,7 @@ func (h *Handler) BlogPost(w http.ResponseWriter, r *http.Request) {
 	data := BlogPostData{
 		Title:       post.Title,
 		Author:      post.Author,
-		GravatarURL: h.blogService.GravatarURL(),
+		GravatarURL: h.config.GravatarURL(),
 		Post:        post,
 	}
 

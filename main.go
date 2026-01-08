@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"embed"
 	"encoding/base64"
 	"fmt"
 	"log"
@@ -12,12 +11,11 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/kiinoda/poem/internal/config"
 	"github.com/kiinoda/poem/internal/handlers"
 	"github.com/kiinoda/poem/internal/services"
+	"github.com/kiinoda/poem/internal/storage"
 )
-
-//go:embed templates/*
-var templatesFS embed.FS
 
 func corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -85,7 +83,6 @@ func lambdaHandler(ctx context.Context, request events.LambdaFunctionURLRequest)
 		}
 	}
 
-	// Check if response is binary based on Content-Type
 	contentType := headers["Content-Type"]
 	isBinary := !strings.HasPrefix(contentType, "text/") &&
 		!strings.HasPrefix(contentType, "application/json")
@@ -130,18 +127,18 @@ func (r *responseRecorder) WriteHeader(statusCode int) {
 func main() {
 	ctx := context.Background()
 
-	// Initialize templates
-	if err := handlers.InitBlogTemplates(templatesFS); err != nil {
-		log.Fatalf("Failed to initialize templates: %v", err)
-	}
-
-	// Initialize blog service
-	blogService, err := services.NewBlogService(ctx)
+	cfg, err := config.Load()
 	if err != nil {
-		log.Fatalf("Failed to initialize blog service: %v", err)
+		log.Fatalf("Failed to load config: %v", err)
 	}
 
-	handler := handlers.New(blogService)
+	store, err := storage.NewS3Store(ctx, cfg.S3Bucket)
+	if err != nil {
+		log.Fatalf("Failed to initialize storage: %v", err)
+	}
+
+	blogService := services.NewBlogService(store)
+	handler := handlers.New(blogService, cfg)
 
 	if os.Getenv("AWS_LAMBDA_FUNCTION_NAME") != "" {
 		fmt.Println("Starting Lambda function...")
@@ -149,12 +146,8 @@ func main() {
 		lambda.Start(lambdaHandler)
 	} else {
 		fmt.Println("Starting local server...")
-		port := os.Getenv("PORT")
-		if port == "" {
-			port = "8080"
-		}
 		httpHandler := setupRoutes(handler)
-		fmt.Printf("Server starting on port %s\n", port)
-		log.Fatal(http.ListenAndServe(":"+port, httpHandler))
+		fmt.Printf("Server starting on port %s\n", cfg.Port)
+		log.Fatal(http.ListenAndServe(":"+cfg.Port, httpHandler))
 	}
 }
