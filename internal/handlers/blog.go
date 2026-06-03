@@ -15,12 +15,17 @@ import (
 var templatesFS embed.FS
 
 var blogTemplates *template.Template
+var faviconSVG []byte
 
 func init() {
 	var err error
 	blogTemplates, err = template.ParseFS(templatesFS, "templates/*.html")
 	if err != nil {
 		panic("failed to parse templates: " + err.Error())
+	}
+	faviconSVG, err = templatesFS.ReadFile("templates/favicon.svg")
+	if err != nil {
+		panic("failed to read favicon.svg: " + err.Error())
 	}
 }
 
@@ -104,9 +109,16 @@ func (h *Handler) Asset(w http.ResponseWriter, r *http.Request) {
 	w.Write(content)
 }
 
+func (h *Handler) Favicon(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "image/svg+xml")
+	w.Header().Set("Cache-Control", "public, max-age=604800")
+	w.Write(faviconSVG)
+}
+
 func (h *Handler) Routes() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", h.BlogList)
+	mux.HandleFunc("GET /favicon.ico", h.Favicon)
 	mux.HandleFunc("GET /assets/{path...}", h.Asset)
 	mux.HandleFunc("GET /{slug}", h.BlogPost)
 	return corsMiddleware(mux)
