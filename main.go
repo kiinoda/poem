@@ -45,7 +45,7 @@ func main() {
 		blogService := services.NewBlogService(store)
 		handler := handlers.New(blogService, cfg)
 		routes := handler.Routes()
-		fmt.Printf("Starting local server on port %s...\n", cfg.Port)
+		fmt.Printf("Starting local server on http://localhost:%s\n", cfg.Port)
 		fmt.Println("Serving posts from ./posts (changes picked up on next request)")
 		log.Fatal(http.ListenAndServe(":"+cfg.Port, routes))
 	}
