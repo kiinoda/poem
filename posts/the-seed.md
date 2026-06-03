@@ -1,7 +1,7 @@
 +++
 title = "The Seed"
 date = "2025-03-15"
-author = "kiiNODA"
+author = "George R. NICA"
 draft = false
 +++
 ## Why (am I doing this)

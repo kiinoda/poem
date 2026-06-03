@@ -1,7 +1,7 @@
 +++
 title = "There is no Kubernetes"
 date = "2025-04-18"
-author = "kiiNODA"
+author = "George R. NICA"
 draft=false
 +++
 When you're a beginner in the DevOps world, you believe that learning Linux will get you a job. Nobody tells you what the real world wants from you. It's not complicated but there are many moving parts. Let's talk history. 🧵

@@ -1,7 +1,7 @@
 +++
 title = "Design a CPU"
 date = "2026-01-06"
-author = "kiiNODA"
+author = "George R. NICA"
 draft = false
 +++
 It's fascinating to me how people work with black box concepts.

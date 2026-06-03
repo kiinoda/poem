@@ -1,7 +1,7 @@
 +++
 title = "Building a Filesystem to Actually Understand One"
 date = "2025-12-16"
-author = "kiiNODA"
+author = "George R. NICA"
 +++
 I've spent years thinking I know about filesystems. What an inode is. What the superblock is. But there's a difference between knowing something theoretically and understanding it through your fingers - the kind of understanding that comes from making something crash, fixing it, and seeing exactly why it works now.
 

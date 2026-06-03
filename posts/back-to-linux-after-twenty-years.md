@@ -1,7 +1,7 @@
 +++
 title = "Back to Linux, after 20 years"
 date = "2025-05-25"
-author = "kiiNODA"
+author = "George R. NICA"
 +++
 I've been working in IT for 24 years. And a mac user for 20. But I switched back to Linux and here's why.
 
