@@ -2,7 +2,6 @@ package config
 
 import (
 	"crypto/md5"
-	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -19,10 +18,6 @@ func Load() (*Config, error) {
 		S3Bucket:    os.Getenv("S3_BUCKET"),
 		AuthorEmail: os.Getenv("BLOG_AUTHOR_EMAIL"),
 		Port:        os.Getenv("PORT"),
-	}
-
-	if cfg.S3Bucket == "" {
-		return nil, errors.New("S3_BUCKET environment variable is required")
 	}
 
 	if cfg.Port == "" {
